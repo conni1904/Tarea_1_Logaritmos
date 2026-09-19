@@ -1,40 +1,39 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
+#include <string.h>
 
 /* Documentacion */
 typedef struct NodoGrafo{
     int nombre; //ver posibilidad de interconexion entre grafos (malo)
-    float conexiones[100]; 
+    float *conexiones; 
 }NodoGrafo;
 
 typedef struct Grafo{
-    NodoGrafo nodos[100];
+    NodoGrafo *nodos;
     int numeroNodos;
 }Grafo;
 
 
 Grafo crearGrafo(int numNodos){
     struct Grafo grafo;
-    grafo.numeroNodos = 0;
-    while (grafo.numeroNodos < numNodos){
-       agregarNodo(&grafo);
+    grafo.numeroNodos = numNodos;
+    grafo.nodos = (NodoGrafo*) malloc(numNodos * sizeof(NodoGrafo));
+    for(int i = 0; i<numNodos; i++){
+        grafo.nodos[i].nombre = i;
+        grafo.nodos[i].conexiones = (float*) malloc(numNodos * sizeof(float));
+        for(int j = 0 ; j<numNodos; j++){
+            if(i == j){
+                grafo.nodos[i].conexiones[j]= 0.0f;
+            }
+            else{
+                grafo.nodos[i].conexiones[j] = INFINITY
+            }
+        }
     }
     return grafo;
 }
 
-void agregarNodo(Grafo *grafo){
-    struct NodoGrafo nodo;
-    nodo.nombre = grafo->numeroNodos;
-    nodo.conexiones[grafo->numeroNodos]= 0.0;
-
-    for (int i=0; i < grafo->numeroNodos; i++){
-        nodo.conexiones[i] = INFINITY;
-        grafo->nodos[i].conexiones[grafo->numeroNodos] = INFINITY;
-    }
-    grafo->nodos[grafo->numeroNodos] = nodo;
-    grafo->numeroNodos++;
-}
 
 void crearArista(Grafo *grafo, int nodoA, int nodoB, float peso){
     grafo->nodos[nodoA].conexiones[nodoB] = peso;
@@ -97,4 +96,32 @@ Grafo generadorAleatorio(int i, int j){
         }
     }
     return grafo;
+}
+
+
+//estructura de arbol binomial, lo sacamos de aux pss 
+
+typedef struct abbTree{
+	char* val;
+	struct abbTree *left, *right;
+}Tree;
+
+
+Tree *initTree(char *value){
+	Tree *ret = (Tree*)malloc(sizeof(Tree));
+	ret->left = NULL;
+	ret->right = NULL;
+	ret->val = (char *)malloc(strlen(value)+1);
+	strcpy(ret->val, value);
+	return ret;
+}
+Tree *insertValue(Tree *root, char *value){
+	if(root == NULL)
+		return initTree(value);
+	int cmp = strcmp(value,root->val);
+	if(cmp<=0)
+		root->left = insertValue(root->left, value);
+	else
+		root->right = insertValue(root->right, value);
+	return root;
 }
