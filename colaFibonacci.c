@@ -133,7 +133,7 @@ void unirArboles(colaFibonacci *Q){
         }
     }
     free(raices);
-    
+
     //ahora hay q reconstruir la lista de raices
     Q->minimo = NULL; //como la lista de raices cambio, desconectamos este minimo de las raices antiguas
     for(int i=0; i<maxGrado; i++){
@@ -260,5 +260,7 @@ void decreaseKey(colaFibonacci *Q, nodoFibonacci *x, float nuevoPeso){
         Q->minimo = x;
     }
 }
+
+
 
 
