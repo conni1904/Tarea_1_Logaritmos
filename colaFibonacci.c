@@ -346,9 +346,9 @@ void decreaseKey(colaFibonacci *Q, nodoFibonacci *x, float nuevoPeso){
     }
 }
 
-Grafo prim(Grafo *g, int r){
+Grafo *primFibonacci(Grafo *g, int r){
     int n = g->numeroNodos; //obtenemos la cantidad de nodos en total del grafo
-    Grafo T = crearGrafo(n); //creamos un grafo con la misma cant de vertices pero sin conexiones (asi iremos construyendo el mst)
+    Grafo *T = crearGrafo(n); //creamos un grafo con la misma cant de vertices pero sin conexiones (asi iremos construyendo el mst)
     //punteros auiliares
     int *padre = (int*) malloc(n * sizeof(int)); // arreglo q contendrá para cada nodo i el nodo padre q lo conecte al arbol MST (en decir va anotando las aristas mas baratas )
     float *clave = (float*) malloc(n * sizeof(float)); //costo minimo para conectar un nodo al MST

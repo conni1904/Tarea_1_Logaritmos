@@ -3,8 +3,6 @@
 #include <math.h>
 #include <string.h>
 
-
-
 typedef struct nodoLista{
     float costo;
     int nodo;
@@ -48,8 +46,7 @@ typedef struct Grafo{
     int numeroNodos;
 }Grafo;
 
-
-Grafo crearGrafo(int numNodos){
+Grafo *crearGrafo(int numNodos){
     struct Grafo grafo;
     grafo.numeroNodos = numNodos;
     grafo.nodos = (NodoGrafo*) malloc(numNodos * sizeof(NodoGrafo));
@@ -57,10 +54,8 @@ Grafo crearGrafo(int numNodos){
         grafo.nodos[i].nombre = i;
         grafo.nodos[i].conexiones = NULL; // REVISAR
     }
-    return grafo;
+    return &grafo;
 }
-
-
 
 void crearArista(Grafo *grafo, int nodoA, int nodoB, float peso){
     if (grafo->nodos[nodoA].conexiones==NULL){
@@ -92,18 +87,18 @@ float generarPeso(){
 }
 
 
-Grafo generadorAleatorio(int i, int j){
+Grafo *generadorAleatorio(int i, int j){
     int v = pow(2,i); //nodos
     int e = pow(2,j);  //aristas
-    Grafo grafo = crearGrafo(pow(2,i));
+    Grafo *grafo = crearGrafo(pow(2,i));
     float peso = generarPeso();
-    crearArista(&grafo, 0, 1, peso); //arista obligatoria
+    crearArista(grafo, 0, 1, peso); //arista obligatoria
     for(int k = 0; k < e-1; k++){
         if(k<v-2){
             float peso = generarPeso();
             int nodoActual = k+2;
             int nodoConectado = rand()%nodoActual;
-            crearArista(&grafo, nodoActual, nodoConectado, peso);
+            crearArista(grafo, nodoActual, nodoConectado, peso);
         }
         else{
             //tomamos dos numeros entre 0 y v-1, que no tengan conexion antes 
@@ -115,15 +110,14 @@ Grafo generadorAleatorio(int i, int j){
                 valorA = rand()% v;
                 valorB = rand()% v;
                 if(valorA != valorB) {
-                    if(!buscarNodo(grafo.nodos[valorA].conexiones, valorB)){
+                    if(!buscarNodo(grafo->nodos[valorA].conexiones, valorB)){
                         valido = true;
                     }
                 }
             }
-            crearArista(&grafo, valorA, valorB, peso);
+            crearArista(grafo, valorA, valorB, peso);
         }
     }
     return grafo;
 }
-
 
