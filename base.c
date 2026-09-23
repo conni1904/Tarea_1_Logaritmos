@@ -3,10 +3,44 @@
 #include <math.h>
 #include <string.h>
 
-/* Documentacion */
+
+
+typedef struct nodoLista{
+    float costo;
+    int nodo;
+    struct nodoLista *siguiente;
+}nodoLista;
+
+void insertarLista(nodoLista *lista, float costo_nodo, int nombre_nodo){
+    if(lista->siguiente == NULL){
+        nodoLista *nuevo = malloc(sizeof(nodoLista));
+        nuevo->costo = costo_nodo;
+        nuevo->nodo= nombre_nodo;
+        nuevo->siguiente = NULL;
+        lista->siguiente=nuevo;
+    }
+    else{
+        insertarLista(lista->siguiente, costo_nodo, nombre_nodo);
+    }
+}
+
+bool buscarNodo(nodoLista *lista, int nombre_nodo){
+    if(lista == NULL){
+        return false;
+    }
+    else if(lista->nodo == nombre_nodo){
+        return true;
+    }
+    else{
+        return buscarNodo(lista->siguiente, nombre_nodo);
+    }
+
+}
+
+/* Doumentacion */
 typedef struct NodoGrafo{
     int nombre; //ver posibilidad de interconexion entre grafos (malo)
-    float *conexiones; 
+    nodoLista *conexiones; 
 }NodoGrafo;
 
 typedef struct Grafo{
@@ -21,62 +55,56 @@ Grafo crearGrafo(int numNodos){
     grafo.nodos = (NodoGrafo*) malloc(numNodos * sizeof(NodoGrafo));
     for(int i = 0; i<numNodos; i++){
         grafo.nodos[i].nombre = i;
-        grafo.nodos[i].conexiones = (float*) malloc(numNodos * sizeof(float));
-        for(int j = 0 ; j<numNodos; j++){
-            if(i == j){
-                grafo.nodos[i].conexiones[j]= 0.0f;
-            }
-            else{
-                grafo.nodos[i].conexiones[j] = INFINITY
-            }
-        }
+        grafo.nodos[i].conexiones = NULL; // REVISAR
     }
     return grafo;
 }
 
 
+
 void crearArista(Grafo *grafo, int nodoA, int nodoB, float peso){
-    grafo->nodos[nodoA].conexiones[nodoB] = peso;
-    grafo->nodos[nodoB].conexiones[nodoA] = peso;
+    if (grafo->nodos[nodoA].conexiones==NULL){
+        nodoLista *nuevo = malloc(sizeof(nodoLista));
+
+        nuevo->costo = peso;
+        nuevo->nodo= nodoB;
+        nuevo->siguiente = NULL;
+        grafo->nodos[nodoA].conexiones=nuevo;
+    }
+    else{
+        insertarLista(grafo->nodos[nodoA].conexiones, peso, nodoB);
+    }
+
+    if (grafo->nodos[nodoB].conexiones==NULL){
+        nodoLista *nuevo = malloc(sizeof(nodoLista));
+        nuevo->costo = peso;
+        nuevo->nodo= nodoA;
+        nuevo->siguiente = NULL;
+        grafo->nodos[nodoB].conexiones=nuevo;
+    }
+    else{
+        insertarLista(grafo->nodos[nodoB].conexiones, peso, nodoA);
+    }
 }
 
 float generarPeso(){
     return (float)(rand() + 1) / (RAND_MAX + 1.0f);
 }
 
-int indiceLista(int *lista, int cantidad, bool eliminacion){
-    int indice = rand()%cantidad;
-    int indice_elegido = lista[indice];
-    if(eliminacion){
-        lista[indice] = lista[cantidad-1];
-    }
-    return indice_elegido;
-
-}
 
 Grafo generadorAleatorio(int i, int j){
-    int v = pow(2,i);
-    int e = pow(2,j);
+    int v = pow(2,i); //nodos
+    int e = pow(2,j);  //aristas
     Grafo grafo = crearGrafo(pow(2,i));
-    int desconectados[v-1];
-    int conectados[v];
-    conectados[0] = 0;
-
-    //inicializando las listas
-    for(int k = 1; k < v; k++){
-        desconectados[k-1] = k;
-    }
-
-    for(int k = 0; k < e; k++){
-        if(k < v-1){
+    float peso = generarPeso();
+    crearArista(&grafo, 0, 1, peso); //arista obligatoria
+    for(int k = 0; k < e-1; k++){
+        if(k<v-2){
             float peso = generarPeso();
-            int desconectado = indiceLista(desconectados, v-1-k, true); //hay q elegir elemento de desconectados 
-            int conectado = indiceLista(conectados, k+1, false); //hay q elegir elemento de conectados
-            conectados[k+1] = desconectado;
-            crearArista(&grafo, desconectado, conectado, peso);
-            
+            int nodoActual = k+2;
+            int nodoConectado = rand()%nodoActual;
+            crearArista(&grafo, nodoActual, nodoConectado, peso);
         }
-
         else{
             //tomamos dos numeros entre 0 y v-1, que no tengan conexion antes 
             float peso = generarPeso(); 
@@ -87,7 +115,7 @@ Grafo generadorAleatorio(int i, int j){
                 valorA = rand()% v;
                 valorB = rand()% v;
                 if(valorA != valorB) {
-                    if(grafo.nodos[valorA].conexiones[valorB] == INFINITY){
+                    if(!buscarNodo(grafo.nodos[valorA].conexiones, valorB)){
                         valido = true;
                     }
                 }
@@ -99,29 +127,3 @@ Grafo generadorAleatorio(int i, int j){
 }
 
 
-//estructura de arbol binomial, lo sacamos de aux pss 
-
-typedef struct abbTree{
-	char* val;
-	struct abbTree *left, *right;
-}Tree;
-
-
-Tree *initTree(char *value){
-	Tree *ret = (Tree*)malloc(sizeof(Tree));
-	ret->left = NULL;
-	ret->right = NULL;
-	ret->val = (char *)malloc(strlen(value)+1);
-	strcpy(ret->val, value);
-	return ret;
-}
-Tree *insertValue(Tree *root, char *value){
-	if(root == NULL)
-		return initTree(value);
-	int cmp = strcmp(value,root->val);
-	if(cmp<=0)
-		root->left = insertValue(root->left, value);
-	else
-		root->right = insertValue(root->right, value);
-	return root;
-}

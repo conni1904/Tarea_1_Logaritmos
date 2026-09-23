@@ -2,32 +2,58 @@
 #include <stdbool.h>
 #include <math.h>
 #include <string.h>
+#include <base.c>
 
-typedef struct nodoFibonacci{
-    float peso; //peso de la arista mas barata hacia el arbol cobertor minimo
-    int nombre;
-    int cantHijos; //cantidad de hijos del nodo
-    bool perdioHijo; // para marcar si nodo perdio hijo
+typedef struct nodoFibonacci{ /*Estructura que define a cada nodo de una cola de Fibonacci*/
+    float peso; /* Peso de la arista mas barata hacia el arbol cobertor minimo*/ 
+    int nombre; /* Nombre para identificar al nodo*/
+    int cantHijos; /* Cantidad de hijos del nodo*/
+    bool perdioHijo; /* Flag para marcar si el nodo ha perdido un hijo*/ 
 
-    struct nodoFibonacci *padre;
-    struct nodoFibonacci *hijo;
-    struct nodoFibonacci *der;
-    struct nodoFibonacci *izq;
+    struct nodoFibonacci *padre; /*Puntero a el padre del nodo*/
+    struct nodoFibonacci *hijo; /*Puntero a uno de los hijos del nodo*/
+    struct nodoFibonacci *der; /*Puntero a hermano derecho del nodo*/
+    struct nodoFibonacci *izq; /*Puntero a hermano izquierdo del nodo*/
 } nodoFibonacci;
 
-typedef struct colaFibonacci{
-    nodoFibonacci *minimo; //puntero a la raiz de menor peso
+typedef struct colaFibonacci{ /*Estructura que representa a la cola de Fibonacci*/
+    nodoFibonacci *minimo; /* Puntero a la raiz de menor peso*/
     int cantNodos; //cantidad de nodos en la cola
 } colaFibonacci;
 
-//primero inicializamos la cola
-colaFibonacci* iniCola() {
+
+
+/**
+ * @brief Función que inicializa y reserva memoria para una cola de Fibonacci con el
+ *  mínimo vacío y sin nodos.
+ * 
+ * @return Un puntero a la cola de Fibonacci recién creada
+ */
+colaFibonacci* iniCola() { 
     colaFibonacci *Q = (colaFibonacci*) malloc(sizeof(colaFibonacci));
     Q->minimo = NULL;
     Q->cantNodos = 0;
     return Q;
 }
+
+
+
 //ahora inicializamos los nodos, es decir, insertarlos
+/**
+ * 
+ * @brief Función que inserta un nodo a la cola de Fibonacci.
+ * 
+ * Crea un nodo con los datos dados y lo inicializa como una lista circular de un
+ * solo elemento y inserta en la raiz de la cola . Si el peso del nodo es menor al 
+ * minimo de la cola, entonces se actualiza el puntero.
+ * 
+ * @param Q Puntero a la cola de Fibonacci.
+ * @param nombre_nodo Nombre para identificar al nodo.
+ * @param peso Costo de cada nodo con el que se ordenara en la cola.
+ * 
+ * @return Puntero al nuevo nodo creado.
+ * 
+ */
 nodoFibonacci* insertar(colaFibonacci *Q, int nombre_nodo, float peso){
     nodoFibonacci *nuevo= (nodoFibonacci*) malloc(sizeof(nodoFibonacci));
     nuevo->nombre = nombre_nodo;
@@ -36,22 +62,22 @@ nodoFibonacci* insertar(colaFibonacci *Q, int nombre_nodo, float peso){
     nuevo->perdioHijo= false;
     nuevo->padre = NULL;
     nuevo->hijo= NULL;
-    //inicialmente se va a apuntar a si mismo en una lista circular
+    //Inicialmente se apuntará a si mismo en una lista circular
     nuevo->der = nuevo; 
     nuevo->izq = nuevo;
 
-    //si la cola esta vacia el nuevo nodo q insertemos sera el minimo
+    //Si la cola esta vacia el nuevo nodo q insertemos sera el minimo
     if(Q->minimo == NULL){
         Q->minimo = nuevo;
     }
+    //Si no esta vacia, insertamos al nuevo nodo a la izquierda del minimo
     else{
-        //si no esta vacia, insertamos al nuevo nodo a la izquierda del minimo
         nuevo->der = Q->minimo;
         nuevo->izq = Q->minimo->izq;
         Q->minimo->izq->der = nuevo;
         Q->minimo->izq = nuevo;
 
-        //ahora vemos si el nuevo es menor que el minimo y lo actualizamos
+        //ahora vemos si el nuevo es menor que el minimo y lo actualizamos de ser así.
         if(nuevo->peso < Q->minimo->peso){
             Q->minimo =nuevo;
         }
@@ -60,11 +86,27 @@ nodoFibonacci* insertar(colaFibonacci *Q, int nombre_nodo, float peso){
     return nuevo;
 }
 
+
+
 //funcion auxiliar para el extractmin
+/**
+ * @brief Función auxiliar que une los arboles para extractMin
+ * 
+ * Se crea un arreglo A con tamaño del grado máximo que puede tener un arbol que servirá
+ * para detectar cuando hay dos arboles del mismo tamaño y así fusionarlos. Para ello se
+ * cuentan las raices en total que hay y los copiamos en un arreglo auxiliar. Luego de la 
+ * fusión de arboles se vuelve a reconstruir el arreglo de raices.
+ * 
+ * @param Q Puntero a la cola de Fibonacci.
+ * 
+ * 
+ */
 void unirArboles(colaFibonacci *Q){
-    //calculo de grado maximo q puede tener un arbol y asi para el arreglo q guardara los arboles ocn ese tamaño
-    int maxGrado = (int)(log2(Q->cantNodos)+2) + 1; //el +2 es un margen de seguridad (?)
-    // el ** es un arreglo de punteros, sirve para detectar las colisiones, contendra las raices clasificadas por su grado
+    //calculo de grado maximo q puede tener un arbol 
+    int maxGrado = (int)(log2(Q->cantNodos)+2) + 1; //el +2 es un margen de seguridad
+
+    // Puntero que sirve para detectar las colisiones, contendra las raices clasificadas 
+    //por su grado
     nodoFibonacci **A = (nodoFibonacci**) malloc(maxGrado * sizeof(nodoFibonacci*));
     for (int i = 0; i< maxGrado; i++){
         A[i]=NULL; //inicialmente todos estaran vacios
@@ -93,15 +135,16 @@ void unirArboles(colaFibonacci *Q){
         }
     }
 
-    //fusionamos arboles de igual grado
+    //Fusión de arboles de igual grado
     for(int i=0; i< numRaices; i++){
         nodoFibonacci *x = raices[i];
         int grado = x->cantHijos; 
         //miramos si en el arreglo A ya esta ocupado, si lo está fusionamos...
         while(grado < maxGrado && A[grado] != NULL){
             nodoFibonacci *y = A[grado];
+            //Vemos si peso es menor o no que el que ya está en el arreglo y hacemos
+            //que el x quede como el de menor peso e y el de mayor peso.
             if(x->peso > y->peso){
-                //aca intercambiamos, el x quedara como el de menor peso ahora
                 nodoFibonacci *temp= x;
                 x=y;
                 y=temp;
@@ -127,20 +170,20 @@ void unirArboles(colaFibonacci *Q){
             A[grado]=NULL;
             grado++;
         }
-        //caso de q A[grado] esta vacio...
+        //caso de q A[grado] esta vacio, solo lo agregamos al arreglo A sin hacer fusiones.
         if(grado< maxGrado){
             A[grado]= x;
         }
     }
     free(raices);
 
-    //ahora hay q reconstruir la lista de raices
+    //ahora hay q reconstruir la lista de raices con el resultado del arreglo A
     Q->minimo = NULL; //como la lista de raices cambio, desconectamos este minimo de las raices antiguas
     for(int i=0; i<maxGrado; i++){
         if (A[i] != NULL){ //para cada grado se ve si quedo un arbol en A
             //caso de que sea el primer arbol q sacamos de A
             if (Q->minimo == NULL){
-                Q->minimo = A[i]; //ponemos q es el minimo por ahora... y hacemos q izq y der apunten a si mismo
+                Q->minimo = A[i]; //ponemos q es el minimo por ahora y hacemos q izq y der apunten a si mismo
                 Q->minimo->izq = Q->minimo;
                 Q->minimo->der = Q->minimo;
             }
@@ -161,6 +204,17 @@ void unirArboles(colaFibonacci *Q){
     free(A);
 }
 
+
+
+/**
+ * 
+ * @brief Función que extrae la raiz con el costo mínimo de la cola.
+ * 
+ * Al extraer el mínimo, todos los hijos de esa raiz deben ser insertados a la lista de 
+ * raices y debe eliminarse el extraido de esta lista.
+ * @param Q Puntero a la cola de Fibonacci.
+ * @return el nodo mínimo extraido
+ */
 nodoFibonacci* extractMin(colaFibonacci *Q){
     nodoFibonacci *min = Q->minimo;
     if(min != NULL){
@@ -191,7 +245,7 @@ nodoFibonacci* extractMin(colaFibonacci *Q){
         min->izq->der= min->der;
         min->der->izq= min->izq;
 
-        //vemos q pasa si min era el unico nodo en la cola (cola tiene q quedar vacia)
+        //vemos q pasa si min era el unico nodo en la cola (cola tiene que quedar vacia)
         if(min==min->der){
             Q->minimo= NULL;
         }
@@ -205,6 +259,18 @@ nodoFibonacci* extractMin(colaFibonacci *Q){
     return min; //retornamos el nodo minimo extraido
 }
 
+
+/**
+ * @brief Funcion que corta el nodo de su padre.
+ * 
+ * Esta función elimina el nodo 'x' de la lista de hijos de 'y' y decrementa el grado de 'y',
+ * y también traslada a 'x' a la lista de raices.
+ * 
+ * @param Q puntero a la cola de Fibonacci donde se reinsertará el nodo a la raiz
+ * @param x puntero al nodo hijo que será cortado y subido a raiz
+ * @param y puntero al nodo padre que perderá a hijo 'x'
+ * 
+ */
 void cut(colaFibonacci *Q, nodoFibonacci *x, nodoFibonacci *y){
     // Sacar a 𝑥 de la lista de hijos de 𝑦 y decrementar 𝑦.degree
     if(x->der == x){
@@ -230,6 +296,19 @@ void cut(colaFibonacci *Q, nodoFibonacci *x, nodoFibonacci *y){
     x->perdioHijo=false;
 }
 
+
+/**
+ * @brief Funcion que realiza corte en cascada de forma recursiva
+ * 
+ * Esta función asegura que se mantenga el equilibrio de la estructura del arbol. Si un
+ * nodo padre ya ha perdido un hijo antes y pierde otro, el padre también es cortado de
+ * su padre y subido a la raiz y así recursivamente hacia arriba.
+ * 
+ * @param Q puntero a la cola de Fibonacci
+ * @param y puntero al nodo que perdió un hijo
+ * 
+ * @see cut
+ */
 void cascadingCut(colaFibonacci *Q, nodoFibonacci *y){
     nodoFibonacci *padre = y->padre;
     if(padre != NULL){
@@ -244,6 +323,12 @@ void cascadingCut(colaFibonacci *Q, nodoFibonacci *y){
     }
 }
 
+
+
+/**
+ * @brief Función que decrementa el peso de un nodo de la cola.
+ * 
+ */
 void decreaseKey(colaFibonacci *Q, nodoFibonacci *x, float nuevoPeso){
     if(nuevoPeso > x->peso){
         return;
@@ -261,6 +346,60 @@ void decreaseKey(colaFibonacci *Q, nodoFibonacci *x, float nuevoPeso){
     }
 }
 
+Grafo prim(Grafo *g, int r){
+    int n = g->numeroNodos; //obtenemos la cantidad de nodos en total del grafo
+    Grafo T = crearGrafo(n); //creamos un grafo con la misma cant de vertices pero sin conexiones (asi iremos construyendo el mst)
+    //punteros auiliares
+    int *padre = (int*) malloc(n * sizeof(int)); // arreglo q contendrá para cada nodo i el nodo padre q lo conecte al arbol MST (en decir va anotando las aristas mas baratas )
+    float *clave = (float*) malloc(n * sizeof(float)); //costo minimo para conectar un nodo al MST
+    bool *enMST = (bool*) malloc(n * sizeof(bool)); //para no revisar nodos nuevamente si ya forma parte del MST
+    nodoFibonacci **nodosCola= (nodoFibonacci**) malloc(n * sizeof(nodoFibonacci*));  //lista de "direcciones de acceso rápido", para q el decreasekey se haga en O(1)
 
+    //inicializamos la cola
+    colaFibonacci *Q= iniCola();
+    //asignamos valores iniciales a los punteros auxiliares
+    for(int i=0; i<n; i++){
+        padre[i]= -1;
+        clave[i]= INFINITY;
+        enMST[i]= false;
+        nodosCola[i]= insertar(Q, i, INFINITY); //insertamos todos los vertices a la cola Fibo con costo infinito y guardamos la referencia en nodoCola
+    }
+    //modificamos al al nodo "origen" r con costo 0
+    clave[r]= 0.0f;
+    decreaseKey(Q, nodosCola[r], 0.0f); //ahora con esto cambiamos el csoto en la cola de fibonacci y asi puntero Q->minimo queda en ese nodo tmb
+
+    //ahora buscamos el nodo con menor peso con extractmin
+    //bucle principal
+    while(Q->cantNodos > 0){
+        nodoFibonacci *nodoMinimo = extractMin(Q);
+        int u= nodoMinimo->nombre; //guardamos el nombre del nodo
+        enMST[u] = true; //lo marcamos dentro en el mst
+        free(nodoMinimo);
+        //ahora exploramos los vecinos de u
+        for(int v = 0; v<n; v++){ //para cada arista le cambiamos el verdadero peso, antes tenian infinity y eso...
+            float pesoArista = g->nodos[u].conexiones[v].costo; //REVISAR
+            if (pesoArista > 0.0f && pesoArista <INFINITY){
+                if(!enMST[v] && pesoArista<clave[v]){ //evaluamos q aun no este en mst y q la arista (u,v) es mas barata q la opcion ya conocida hasta el momento para alcanzar v 
+                    clave[v]= pesoArista;
+                    padre[v]=u;
+                    decreaseKey(Q, nodosCola[v], pesoArista);
+                }
+                
+            }
+        }
+    }
+    //ahora si constuimos el arbol cobertor minimo
+    for (int i =0; i<n; i++){
+        if(padre[i] != -1){ //recorremos el arreglo de padres y para cada nodo q tenga una conexion valida lo insertamos la albrol
+            crearArista(&T, padre[i], i, clave[i]);
+        }
+    }
+    free(padre);
+    free(clave);
+    free(enMST);
+    free(nodosCola);
+    free(Q);
+    return T;
+}
 
 
