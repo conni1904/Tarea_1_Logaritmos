@@ -140,7 +140,7 @@ arbolBk *encontrar(arbolBk *arbol, int nodo){
         return arbol;
     }
     for(int i = 0; i<(arbol->Bk); i++){
-        encontrar(arbol->hijos[i],nodo);
+        return encontrar(arbol->hijos[i],nodo);
         //agregar otro return de ser necesario
     }
 }
@@ -160,4 +160,50 @@ void decreaseKeyB(colaBinomial *Q, int v, int c){
     arbolBk *arbol = encontrar(Q->lista[lugar],v);
     arbol->info.costo=c;
     reordenar(arbol);
+}
+
+Grafo *PrimBinomial(Grafo *g,int r){
+    int n = g->numeroNodos;
+
+    int *parent = (int*) malloc(n * sizeof(int)); 
+    float *costos = (float*) malloc(n * sizeof(float));
+
+    costos[r] = 0.0f;
+    parent[r] = -1;
+
+    for(int i=0; i<n; i++){
+        if(i!=r){
+            costos[i] = INFINITY;
+            parent[i] = -1;
+        }
+    }
+
+    colaBinomial *Q = crearCola(costos, n);
+    Grafo *T = crearGrafo(n);
+
+    while(Q->n > 0){
+        par min = extractMinB(Q);
+        float c = min.costo;
+        int v = min.nodo;
+        if (v != r){
+            crearArista(T, parent[v], v, c);
+        }
+        nodoLista *actual = g->nodos[v].conexiones;
+        while(actual != NULL){
+            int u = actual->nodo;
+            float wu = actual->costo;
+            if(wu<costos[u]){
+                costos[u] = wu; 
+                parent[u] = v;
+                decreaseKeyB(Q,u,wu);
+            }
+            actual = actual->siguiente;
+        }
+    }
+    free(parent);
+    free(costos);
+    free(Q->lista);
+    free(Q->orden);
+    free(Q);
+    return T;
 }
