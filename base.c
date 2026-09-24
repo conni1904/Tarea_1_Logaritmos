@@ -3,6 +3,7 @@
 #include <math.h>
 #include <string.h>
 
+
 typedef struct nodoLista{
     float costo;
     int nodo;
@@ -47,14 +48,14 @@ typedef struct Grafo{
 }Grafo;
 
 Grafo *crearGrafo(int numNodos){
-    struct Grafo grafo;
-    grafo.numeroNodos = numNodos;
-    grafo.nodos = (NodoGrafo*) malloc(numNodos * sizeof(NodoGrafo));
+    Grafo *grafo = (Grafo*) malloc(sizeof(Grafo));
+    grafo->numeroNodos = numNodos;
+    grafo->nodos = (NodoGrafo*) malloc(numNodos * sizeof(NodoGrafo));
     for(int i = 0; i<numNodos; i++){
-        grafo.nodos[i].nombre = i;
-        grafo.nodos[i].conexiones = NULL; // REVISAR
+        grafo->nodos[i].nombre = i;
+        grafo->nodos[i].conexiones = NULL; // REVISAR
     }
-    return &grafo;
+    return grafo;
 }
 
 void crearArista(Grafo *grafo, int nodoA, int nodoB, float peso){

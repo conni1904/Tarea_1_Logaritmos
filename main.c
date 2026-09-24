@@ -1,11 +1,13 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
 #include <string.h>
-#include <base.c>
-#include <colaFibonacci.c>
-#include <binomial.c>
 #include <time.h>
+#include "base2.c"
+#include "colaFibonacci.c"
+#include "binomial.c"
+
 double tiempoA1F[10];
 
 int main (int argvc, char* argv[]){
@@ -16,19 +18,22 @@ int main (int argvc, char* argv[]){
         Grafo *grafo = generadorAleatorio( 20, 20);
 
         //cola binomial
-        clock_t ini = clock();
+        //clock_t ini = clock();
 
-        clock_t fin = clock();
-        double tiempo = (double)(fin-ini)/ CLOCKS_PER_SEC;
+       // clock_t fin = clock();
+        //double tiempo = (double)(fin-ini)/ CLOCKS_PER_SEC;
 
 
         //cola fibomacci
         clock_t ini = clock();
-        primFibonacci(grafo,0);
+        Grafo *mst = primFibonacci(grafo,0);
         clock_t fin = clock();
         double tiempo = (double)(fin-ini)/ CLOCKS_PER_SEC;
         tiempoA1F[k]=tiempo;
-         printf(tiempo);
+        printf("Tiempo [%d]: %f segundos\n", k + 1, tiempo);
+        fflush(stdout);
+        liberarGrafo(grafo);
+        liberarGrafo(mst);
         //serie b
 
 

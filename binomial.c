@@ -1,4 +1,4 @@
-#include <base.c>
+#include "base.h"
 #include <math.h>
 typedef struct par{
     float costo;
@@ -7,11 +7,20 @@ typedef struct par{
 
 typedef struct arbolBk{
     par info;
-    arbolBk *padre;
-    arbolBk **hijos;
+    struct arbolBk *padre;
+    struct arbolBk **hijos;
     int Bk;
     int k;
 }arbolBk;
+
+typedef struct colaBinomial{
+    arbolBk **lista;
+    arbolBk *minimo;
+    int n;
+    int *orden;
+}colaBinomial;
+
+void insertarArbol(colaBinomial *cola, arbolBk *arbol);
 
 arbolBk *crearArbol(float costo, int nodo, int n){
     arbolBk *arbol = malloc(sizeof(arbolBk));
@@ -23,24 +32,6 @@ arbolBk *crearArbol(float costo, int nodo, int n){
     arbol->hijos = malloc(n * sizeof(arbolBk *));
     return arbol;
 }
-
-arbolBk *unir(arbolBk *arbolA, arbolBk *arbolB){
-    if(arbolB->info.costo>arbolA->info.costo){
-        arbolB->padre = arbolA;
-        arbolA->hijos[arbolA->Bk] = arbolB;
-        arbolA->Bk++;
-        subirK(arbolA,arbolA->k+1);
-        return arbolA;
-    }
-    else{
-        arbolA->padre = arbolB;
-        arbolB->hijos[arbolB->Bk] = arbolA;
-        arbolB->Bk++;
-        subirK(arbolB,arbolB->k+1);
-        return arbolB;
-    }
-}
-
 void cambiarK(arbolBk *arbol, int s){
     arbol->k=s;
     for(int i = 0; i<arbol->Bk; i++){;
@@ -48,18 +39,36 @@ void cambiarK(arbolBk *arbol, int s){
     }
 }
 
-typedef struct colaBinomial{
-    arbolBk **lista;
-    arbolBk *minimo;
-    int n;
-    int **orden;
-}colaBinomial;
+arbolBk *unir(arbolBk *arbolA, arbolBk *arbolB){
+    if(arbolB->info.costo>arbolA->info.costo){
+        arbolB->padre = arbolA;
+        arbolA->hijos[arbolA->Bk] = arbolB;
+        arbolA->Bk++;
+        cambiarK(arbolA,arbolA->k+1);
+        return arbolA;
+    }
+    else{
+        arbolA->padre = arbolB;
+        arbolB->hijos[arbolB->Bk] = arbolA;
+        arbolB->Bk++;
+        cambiarK(arbolB,arbolB->k+1);
+        return arbolB;
+    }
+}
+
+
+
+
 
 void ordenArbol(colaBinomial *cola,arbolBk *arbol){
     cola->orden[arbol->info.nodo]=arbol->k;
     for(int i = 0; i<arbol->Bk; i++){
         ordenArbol(cola, arbol->hijos[i]);
     }
+}
+void insertarB(colaBinomial *cola, float costo, int nodo){
+    arbolBk *arbol = crearArbol(costo, nodo, cola->n);
+    insertarArbol(cola,arbol);
 }
 
 colaBinomial *crearCola(float *costos, int n){
@@ -74,7 +83,7 @@ colaBinomial *crearCola(float *costos, int n){
         Q->lista[i]=NULL;
     }
     for(int i = 0; i<n; i++){
-        insertar(Q,costos[i],i);
+        insertarB(Q,costos[i],i);
     }
     //puede que innecesarios
     /*for(int i = 0 ; i<log2(Q->n); i++){
@@ -99,13 +108,10 @@ void insertarArbol(colaBinomial *cola, arbolBk *arbol){
     }
 }
 
-void insertar(colaBinomial *cola, float costo, int nodo){
-    arbolBk *arbol = crearArbol(costo, nodo, cola->n);
-    insertarArbol(cola,arbol);
-}
 
 
-par extractMin(colaBinomial *Q){
+
+par extractMinB(colaBinomial *Q){
     arbolBk *min = Q->minimo;
     par minimo = min->info;
     Q->lista[min->Bk]=NULL;
@@ -149,7 +155,7 @@ void reordenar(arbolBk *arbol){
     }
 }
 
-void decreaseKey(colaBinomial *Q, int v, int c){
+void decreaseKeyB(colaBinomial *Q, int v, int c){
     int lugar = Q->orden[v];
     arbolBk *arbol = encontrar(Q->lista[lugar],v);
     arbol->info.costo=c;

@@ -2,7 +2,8 @@
 #include <stdbool.h>
 #include <math.h>
 #include <string.h>
-#include <base.c>
+#include "base.h"
+
 
 typedef struct nodoFibonacci{ /*Estructura que define a cada nodo de una cola de Fibonacci*/
     float peso; /* Peso de la arista mas barata hacia el arbol cobertor minimo*/ 
@@ -372,26 +373,30 @@ Grafo *primFibonacci(Grafo *g, int r){
     //bucle principal
     while(Q->cantNodos > 0){
         nodoFibonacci *nodoMinimo = extractMin(Q);
+        if(nodoMinimo == NULL){
+            break;
+        }
         int u= nodoMinimo->nombre; //guardamos el nombre del nodo
         enMST[u] = true; //lo marcamos dentro en el mst
         free(nodoMinimo);
+
         //ahora exploramos los vecinos de u
-        for(int v = 0; v<n; v++){ //para cada arista le cambiamos el verdadero peso, antes tenian infinity y eso...
-            float pesoArista = g->nodos[u].conexiones[v].costo; //REVISAR
-            if (pesoArista > 0.0f && pesoArista <INFINITY){
-                if(!enMST[v] && pesoArista<clave[v]){ //evaluamos q aun no este en mst y q la arista (u,v) es mas barata q la opcion ya conocida hasta el momento para alcanzar v 
+        nodoLista *actual = g->nodos[u].conexiones;
+        while(actual != NULL){
+            int v = actual->nodo;
+            float pesoArista = actual->costo;
+            if(!enMST[v] && pesoArista<clave[v]){ //evaluamos q aun no este en mst y q la arista (u,v) es mas barata q la opcion ya conocida hasta el momento para alcanzar v 
                     clave[v]= pesoArista;
                     padre[v]=u;
                     decreaseKey(Q, nodosCola[v], pesoArista);
-                }
-                
             }
+            actual= actual->siguiente;
         }
     }
     //ahora si constuimos el arbol cobertor minimo
     for (int i =0; i<n; i++){
         if(padre[i] != -1){ //recorremos el arreglo de padres y para cada nodo q tenga una conexion valida lo insertamos la albrol
-            crearArista(&T, padre[i], i, clave[i]);
+            crearArista(T, padre[i], i, clave[i]);
         }
     }
     free(padre);
