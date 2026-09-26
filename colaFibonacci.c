@@ -328,7 +328,13 @@ void cascadingCut(colaFibonacci *Q, nodoFibonacci *y){
 
 /**
  * @brief Función que decrementa el peso de un nodo de la cola.
+ * Esta función hace que al decrementar la clave de un nodo, se siga cumpliendo que 
+ * los hijos sean mayores que los padres con las funciones de cut y cascading cut.
+ * @param Q puntero a la cola de Fibonacci
+ * @param x puntero al nodo que se le quiere decrementar la clave
+ * @param nuevoPeso valor float de la nueva clave
  * 
+ * @see cascadinCut, cut
  */
 void decreaseKey(colaFibonacci *Q, nodoFibonacci *x, float nuevoPeso){
     if(nuevoPeso > x->peso){
@@ -347,6 +353,18 @@ void decreaseKey(colaFibonacci *Q, nodoFibonacci *x, float nuevoPeso){
     }
 }
 
+/**
+ * @brief Función que genera un arbol cobertor mínimo de un grafo.
+ * 
+ * Para crear al MST se crea un grafo sin aristas y con la misma cantidad de nodos e insertamos todos los nodos a
+ * la cola de Fibonacci con costo infinito, luego cuando se van revisando los caminos se van decreciendo los valores
+ * con la funcion decreaseKey.
+ * @param g Grafo al que se le aplicará Prim para conseguir mst
+ * @param r nodo de origen.
+ * 
+ * @see insertar, decreaseKey, extractMin, crearArista
+ * 
+ */
 Grafo *primFibonacci(Grafo *g, int r){
     int n = g->numeroNodos; //obtenemos la cantidad de nodos en total del grafo
     Grafo *T = crearGrafo(n); //creamos un grafo con la misma cant de vertices pero sin conexiones (asi iremos construyendo el mst)

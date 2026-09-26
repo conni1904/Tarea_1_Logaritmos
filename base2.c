@@ -5,19 +5,33 @@
 #include "base.h"
 
 
-typedef struct nodoLista{
-    float costo;
-    int nodo;
-    struct nodoLista *siguiente;
+typedef struct nodoLista{ /*Estructura que representa a un nodo de una lista*/
+    float costo; // Costo del nodo de la lista
+    int nodo; // Número para identificar el nodo
+    struct nodoLista *siguiente; //Puntero al siguiente nodo de la lista
 }nodoLista;
 
-typedef struct NodoGrafo{
-    int nombre; //ver posibilidad de interconexion entre grafos (malo)
-    nodoLista *conexiones; 
+typedef struct NodoGrafo{ /*Estructura que representa a un nodo de un grafo*/
+    int nombre; /*Nombre para identificar el nodo del grafo*/
+    nodoLista *conexiones; /*Puntero a una lista con las conexiones a otros nodos que tiene el nodo*/
 }NodoGrafo;
 
-//de esta forma se inserta al inicio y no tenemos q recorrer toda la lista de nodos para pegar uno nuevo al final
-//ahora esto esta en O(1) y lo q teniamos antes estaba en O(N)
+typedef struct Grafo{ /*Estructura que representa a un grafo*/
+    NodoGrafo *nodos; /*Puntero a nodo que conforma el grafo*/
+    int numeroNodos; /* Cantidad total de nodos del grafo*/
+}Grafo;
+
+
+
+/**
+ * @brief Inserta un nuevo nodo al inicio de la lista de adyacencia de un nodo
+ * Esta función inserta una arista o conexión al inicio de la lista de vecinos que tiene un nodo,
+ * con complejidad temporal de O(1)
+ * 
+ * @param nodoGrafo como su nombre dice, es el nodo en donde queremos agregar la nueva conexión
+ * @param costo_nodo costo asociado a la arista
+ * @param nombre_nodo identificador del nodo destino
+ */
 void insertarLista(NodoGrafo *nodoGrafo, float costo_nodo, int nombre_nodo){
     nodoLista *nuevo = (nodoLista*) malloc(sizeof(nodoLista));
     nuevo->costo = costo_nodo;
@@ -26,46 +40,47 @@ void insertarLista(NodoGrafo *nodoGrafo, float costo_nodo, int nombre_nodo){
     nodoGrafo->conexiones = nuevo;
 }
 
-bool buscarNodo(nodoLista *lista, int nombre_nodo){
-    if(lista == NULL){
-        return false;
-    }
-    else if(lista->nodo == nombre_nodo){
-        return true;
-    }
-    else{
-        return buscarNodo(lista->siguiente, nombre_nodo);
-    }
 
-}
-
-/* Doumentacion */
-typedef struct NodoGrafo{
-    int nombre; //ver posibilidad de interconexion entre grafos (malo)
-    nodoLista *conexiones; 
-}NodoGrafo;
-
-typedef struct Grafo{
-    NodoGrafo *nodos;
-    int numeroNodos;
-}Grafo;
-
+/**
+ * @brief Inicializa y reserva memoria para la estructura de un nuevo grafo
+ * El grafo se crea con una cantidad fija de nodos, asignando a cada uno de ellos su nombre
+ *  para identificarlo y sin conexiones.
+ * 
+ * @param numNodos Es la cantidad de nodos con el que se debe crear el grafo
+ */
 Grafo *crearGrafo(int numNodos){
     Grafo *grafo = (Grafo*) malloc(sizeof(Grafo));
     grafo->numeroNodos = numNodos;
     grafo->nodos = (NodoGrafo*) malloc(numNodos * sizeof(NodoGrafo));
     for(int i = 0; i<numNodos; i++){
         grafo->nodos[i].nombre = i;
-        grafo->nodos[i].conexiones = NULL; // REVISAR
+        grafo->nodos[i].conexiones = NULL;
     }
     return grafo;
 }
- //como ahora se inserta al inicio, los ifs q teníamos antes ya no hacen falta
+ 
+/**
+ * @brief Función que crea una arista o conexión entre dos nodos.
+ * Se crea una arista en los dos sentidos, es decir, si A--B se inserta a la lista de 
+ * adyacencia de A a B y de B a A.
+ * @param grafo Puntero al grafo donde se está creando la arista
+ * @param nodoA Uno de los nodos que se quiere conectar
+ * @param nodoB Uno de los nodos que se quiere conectar
+ * @param peso Peso de la arista que se está creando
+ */
 void crearArista(Grafo *grafo, int nodoA, int nodoB, float peso){
     insertarLista(&(grafo->nodos[nodoA]), peso, nodoB);
     insertarLista(&(grafo->nodos[nodoB]), peso, nodoA);
 }
 
+
+/**
+ * @brief Genera un peso aleatorio a una arista en el rango (0,1]
+ * Esta función calcula un valor float "aleatorio" con distribución uniforme. Se le suma un 1
+ * al resultado de rand para garantizar que no existan aristas de valor 0
+ * 
+ * @return un valor float dentro del rango (0,1]
+ */
 float generarPeso(){
     return (float)(rand() + 1) / (RAND_MAX + 1.0f);
 }
