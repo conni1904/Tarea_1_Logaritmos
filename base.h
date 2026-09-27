@@ -16,17 +16,21 @@ typedef struct nodoLista {
 typedef struct NodoGrafo {
     int nombre;
     nodoLista *conexiones; 
+    int grado;
 } NodoGrafo;
 
 typedef struct Grafo {
     NodoGrafo *nodos;
     int numeroNodos;
+    nodoLista *pool;
+    int pool_usado;
+    int pool_capacidad;
 } Grafo;
 
 // Prototipos de funciones
-void insertarLista(NodoGrafo *grafo, float costo_nodo, int nombre_nodo);
+void insertarLista(Grafo *g, NodoGrafo *nodoGrafo, float costo_nodo, int nombre_nodo);
 bool buscarNodo(nodoLista *lista, int nombre_nodo);
-Grafo *crearGrafo(int numNodos);
+Grafo *crearGrafo(int numNodos, int maxAristas);
 void crearArista(Grafo *grafo, int nodoA, int nodoB, float peso);
 float generarPeso(void);
 Grafo *generadorAleatorio(int i, int j);

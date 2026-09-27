@@ -14,11 +14,15 @@ typedef struct nodoLista{ /*Estructura que representa a un nodo de una lista*/
 typedef struct NodoGrafo{ /*Estructura que representa a un nodo de un grafo*/
     int nombre; /*Nombre para identificar el nodo del grafo*/
     nodoLista *conexiones; /*Puntero a una lista con las conexiones a otros nodos que tiene el nodo*/
+    int grado;
 }NodoGrafo;
 
 typedef struct Grafo{ /*Estructura que representa a un grafo*/
     NodoGrafo *nodos; /*Puntero a nodo que conforma el grafo*/
     int numeroNodos; /* Cantidad total de nodos del grafo*/
+    nodoLista *pool;
+    int pool_usado;
+    int pool_capacidad;
 }Grafo;
 
 
@@ -32,12 +36,13 @@ typedef struct Grafo{ /*Estructura que representa a un grafo*/
  * @param costo_nodo costo asociado a la arista
  * @param nombre_nodo identificador del nodo destino
  */
-void insertarLista(NodoGrafo *nodoGrafo, float costo_nodo, int nombre_nodo){
-    nodoLista *nuevo = (nodoLista*) malloc(sizeof(nodoLista));
+void insertarLista(Grafo *g, NodoGrafo *nodoGrafo, float costo_nodo, int nombre_nodo){
+    nodoLista *nuevo = &g->pool[g->pool_usado++];
     nuevo->costo = costo_nodo;
     nuevo->nodo = nombre_nodo;
     nuevo->siguiente = nodoGrafo->conexiones; 
     nodoGrafo->conexiones = nuevo;
+    nodoGrafo->grado++;
 }
 
 
@@ -48,14 +53,18 @@ void insertarLista(NodoGrafo *nodoGrafo, float costo_nodo, int nombre_nodo){
  * 
  * @param numNodos Es la cantidad de nodos con el que se debe crear el grafo
  */
-Grafo *crearGrafo(int numNodos){
+Grafo *crearGrafo(int numNodos, int maxAristas){
     Grafo *grafo = (Grafo*) malloc(sizeof(Grafo));
     grafo->numeroNodos = numNodos;
     grafo->nodos = (NodoGrafo*) malloc(numNodos * sizeof(NodoGrafo));
     for(int i = 0; i<numNodos; i++){
         grafo->nodos[i].nombre = i;
         grafo->nodos[i].conexiones = NULL;
+        grafo->nodos[i].grado = 0;
     }
+    grafo->pool = malloc(2L * maxAristas * sizeof(nodoLista));
+    grafo->pool_usado=0;
+    grafo->pool_capacidad = 2*maxAristas;
     return grafo;
 }
  
@@ -69,8 +78,8 @@ Grafo *crearGrafo(int numNodos){
  * @param peso Peso de la arista que se está creando
  */
 void crearArista(Grafo *grafo, int nodoA, int nodoB, float peso){
-    insertarLista(&(grafo->nodos[nodoA]), peso, nodoB);
-    insertarLista(&(grafo->nodos[nodoB]), peso, nodoA);
+    insertarLista(grafo, &(grafo->nodos[nodoA]), peso, nodoB);
+    insertarLista(grafo, &(grafo->nodos[nodoB]), peso, nodoA);
 }
 
 
@@ -89,13 +98,15 @@ float generarPeso(){
 Grafo *generadorAleatorio(int i, int j){
     int v = pow(2,i); //nodos
     int e = pow(2,j);  //aristas
-    Grafo *grafo = crearGrafo(v);
+    Grafo *grafo = crearGrafo(v,e);
+    printf("se crea grafo vacio");
 
     //hacemos arbol conexo
     for (int k =1; k<v; k++){
         int padre = rand()%k;
         crearArista(grafo, k, padre, generarPeso());
     }
+    printf("se crea grafo conexo");
 
     //ahora veamos las aristas restantes
     int restantes = e - v +1;
@@ -110,10 +121,17 @@ Grafo *generadorAleatorio(int i, int j){
                 continue; //con continue salta a la siguiente iteracion, no hace nada de lo de abajo
             }
             //ahora buscamos si la arista ya existe antes de crearla...
+            int origenBusqueda = valorA;
+            int objetivoBusqueda = valorB;
+
+            if (grafo->nodos[valorB].grado < grafo->nodos[valorA].grado) {
+                origenBusqueda = valorB;
+                objetivoBusqueda = valorA;
+            }
             bool yaExiste = false;
-            nodoLista *actual = grafo->nodos[valorA].conexiones;
+            nodoLista *actual = grafo->nodos[origenBusqueda].conexiones;
             while(actual!=NULL){
-                if(actual->nodo == valorB){
+                if(actual->nodo == objetivoBusqueda){
                     yaExiste = true;
                     break;
                 }
@@ -130,18 +148,7 @@ Grafo *generadorAleatorio(int i, int j){
 
 void liberarGrafo(Grafo *grafo) {
     if (grafo == NULL) return;
-    
-    // 1. Liberar la lista enlazada de conexiones de cada nodo
-    for (int i = 0; i < grafo->numeroNodos; i++) {
-        nodoLista *actual = grafo->nodos[i].conexiones;
-        while (actual != NULL) {
-            nodoLista *temp = actual;
-            actual = actual->siguiente;
-            free(temp); // Liberar cada nodoLista individualmente
-        }
-    }
-    
-    // 2. Liberar el arreglo de nodos y la estructura del grafo
+    free(grafo->pool);
     free(grafo->nodos);
     free(grafo);
 }

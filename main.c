@@ -9,32 +9,40 @@
 #include "binomial.c"
 
 double tiempoA1F[10];
+double tiempoA1B[10];
+
 
 int main (int argvc, char* argv[]){
     for(int k=0; k<10; k++){
         //COSTO TOTAL
         //seria a i=20
         //j=20
-        Grafo *grafo = generadorAleatorio( 20, 20);
+        Grafo *grafo = generadorAleatorio(22, 24);
+        printf("se genera grafo");
 
-        //cola binomial
-        //clock_t ini = clock();
-
-       // clock_t fin = clock();
-        //double tiempo = (double)(fin-ini)/ CLOCKS_PER_SEC;
-
-
-        //cola fibomacci
-        clock_t ini = clock();
-        Grafo *mst = primFibonacci(grafo,0);
-        clock_t fin = clock();
-        double tiempo = (double)(fin-ini)/ CLOCKS_PER_SEC;
-        tiempoA1F[k]=tiempo;
-        printf("Tiempo [%d]: %f segundos\n", k + 1, tiempo);
+        // //cola fibomacci
+        clock_t inif = clock();
+        Grafo *mstf = primFibonacci(grafo,0);
+        clock_t finf = clock();
+        double tiempof = (double)(finf-inif)/ CLOCKS_PER_SEC;
+        tiempoA1F[k]=tiempof;
+        printf("Tiempo [%d]: %f segundos\n", k + 1, tiempof);
         fflush(stdout);
+        liberarGrafo(mstf);
+        //cola binomial
+        // clock_t inib = clock();
+        // Grafo *mstb = PrimBinomial(grafo,0);
+        // clock_t finb = clock();
+        // double tiempob = (double)(finb-inib)/ CLOCKS_PER_SEC;
+        // tiempoA1B[k]=tiempob;
+        // printf("Tiempo [%d]: %f segundos\n", k + 1, tiempob);
+        // fflush(stdout);
         liberarGrafo(grafo);
-        liberarGrafo(mst);
+        // liberarGrafo(mstb);
+
         //serie b
+
+
 
 
         //COSTO AMORTIZADO

@@ -179,7 +179,7 @@ Grafo *PrimBinomial(Grafo *g,int r){
     }
 
     colaBinomial *Q = crearCola(costos, n);
-    Grafo *T = crearGrafo(n);
+    Grafo *T = crearGrafo(n, n-1);
 
     while(Q->n > 0){
         par min = extractMinB(Q);
