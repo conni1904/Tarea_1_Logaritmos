@@ -94,19 +94,36 @@ float generarPeso(){
     return (float)(rand() + 1) / (RAND_MAX + 1.0f);
 }
 
+float pesoMST(Grafo *g){
+    float pesoTot = 0.0f;
+    for(int i =0; i< g->numeroNodos ; i++){
+        nodoLista *actual = g->nodos[i].conexiones;
+        while(actual != NULL){
+            pesoTot += actual->costo;
+            //printf("peso actual: %f\n",actual->costo);
+            //printf("nodo actual : %f\n",actual->nodo);
+            //printf("--------------------------------\n");
+            actual= actual->siguiente;
+            
+
+        }
+    }
+    pesoTot = pesoTot/2;
+    return pesoTot;
+}
+
 
 Grafo *generadorAleatorio(int i, int j){
     int v = pow(2,i); //nodos
     int e = pow(2,j);  //aristas
     Grafo *grafo = crearGrafo(v,e);
-    printf("se crea grafo vacio");
 
     //hacemos arbol conexo
     for (int k =1; k<v; k++){
         int padre = rand()%k;
         crearArista(grafo, k, padre, generarPeso());
     }
-    printf("se crea grafo conexo");
+
 
     //ahora veamos las aristas restantes
     int restantes = e - v +1;

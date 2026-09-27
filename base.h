@@ -33,6 +33,7 @@ bool buscarNodo(nodoLista *lista, int nombre_nodo);
 Grafo *crearGrafo(int numNodos, int maxAristas);
 void crearArista(Grafo *grafo, int nodoA, int nodoB, float peso);
 float generarPeso(void);
+float pesoMST(Grafo *g);
 Grafo *generadorAleatorio(int i, int j);
 
 #endif // BASE_H
