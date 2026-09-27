@@ -1,6 +1,5 @@
 #include "base.h"
 #include <math.h>
-
 typedef struct par{
     float costo;
     int nodo;
@@ -123,6 +122,9 @@ void reordenar(colaBinomial *Q, arbolBk *arbol){
         Q->pos[arbol->info.nodo] = arbol;
         reordenar(Q,padre);
     }
+    if(padre == NULL && Q->minimo->info.costo>arbol->info.costo){
+        Q->minimo = arbol;
+    }
 }
 
 void decreaseKeyB(colaBinomial *Q, int v, float c){
@@ -161,7 +163,7 @@ Grafo *PrimBinomial(Grafo *g,int r){
         while(actual != NULL){
             int u = actual->nodo;
             float wu = actual->costo;
-            if(Q->pos[u] != NULL && wu<costos[u]){
+            if(Q->pos[u]!=NULL && wu<costos[u]){
                 costos[u] = wu; 
                 parent[u] = v;
                 decreaseKeyB(Q,u,wu);
