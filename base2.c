@@ -4,17 +4,20 @@
 #include <string.h>
 #include "base.h"
 
-
-typedef struct nodoLista{ /*Estructura que representa a un nodo de una lista*/
-    double costo; // Costo del nodo de la lista
-    int nodo; // Número para identificar el nodo
-    struct nodoLista *siguiente; //Puntero al siguiente nodo de la lista
+/**
+ * @brief Estructura que representa un elemento en la lista enlazada de adyacencia.
+ */
+typedef struct nodoLista{
+    double costo; /**< Peso o costo asociado a la arista que conecta con el nodo vecino. */
+    int nodo; /**< Identificador único del nodo vecino de destino (0 a V-1). */
+    struct nodoLista *siguiente; /**< Puntero al siguiente vecino en la lista de adyacencia*/
 } nodoLista;
+
 
 /**
  * @brief Estructura que representa un nodo (vértice) dentro del grafo.
  */
-typedef struct NodoGrafo{ /**< Estructura que representa a un nodo de un grafo*/
+typedef struct NodoGrafo{ 
     int nombre; /**< Nombre para identificar el nodo del grafo*/
     nodoLista *conexiones; /**< Puntero a una lista con las conexiones a otros nodos que tiene el nodo*/
     int grado; /**< Número de vecinos conectados al nodo.*/
@@ -24,12 +27,12 @@ typedef struct NodoGrafo{ /**< Estructura que representa a un nodo de un grafo*/
 /**
  * @brief Estructura principal que representa el Grafo y su gestión de memoria.
  */
-typedef struct Grafo{ /*Estructura que representa a un grafo*/
-    NodoGrafo *nodos; /*Puntero a nodo que conforma el grafo*/
-    int numeroNodos; /* Cantidad total de nodos del grafo*/
-    nodoLista *pool;
-    int pool_usado;
-    int pool_capacidad;
+typedef struct Grafo{ 
+    NodoGrafo *nodos; /**< Puntero a nodo que conforma el grafo */
+    int numeroNodos; /**<  Cantidad total de nodos del grafo */
+    nodoLista *pool; /**< Bloque único de memoria contigua reservado para todas las aristas */
+    int pool_usado; /**< Contador del número de bloques de aristas dentro de pool */
+    int pool_capacidad; /**< Capacidad máxima de bloques nodoLista reservados en pool */
 }Grafo;
 
 
@@ -107,9 +110,6 @@ double pesoMST(Grafo *g){
         nodoLista *actual = g->nodos[i].conexiones;
         while(actual != NULL){
             pesoTot += actual->costo;
-            //printf("peso actual: %f\n",actual->costo);
-            //printf("nodo actual : %f\n",actual->nodo);
-            //printf("--------------------------------\n");
             actual= actual->siguiente;
             
 
@@ -120,6 +120,19 @@ double pesoMST(Grafo *g){
 }
 
 
+/**
+ * @brief Genera un grafo aleatorio conexo y no dirigido de tamaño 2^i nodos y 2^j aristas.
+ * 
+ * La generación se realiza en dos etapas principales: Primero se garantiza la conexidad del grafo 
+ * construyendo un árbol cobertor inicial mediante la conexión del nodo k con un nodo padre aleatorio
+ * en el rango [0, k-1]. Segundo, se agregan las atistas restantes (2^j - 2^i + 1) seleccionando
+ * pares de nodos de forma aleatoria, evitando autociclos y aristas duplicadas.
+ * 
+ * @param i Exponente base 2 para determinar el número de nodos
+ * @param j Exponente base 2 para determinar el número total de aristas.
+ * 
+ * @return Grafo* Puntero a la estructura del grafo aleatorio generado en memoria.
+ */
 Grafo *generadorAleatorio(int i, int j){
     int v = pow(2,i); //nodos
     int e = pow(2,j);  //aristas
@@ -130,7 +143,6 @@ Grafo *generadorAleatorio(int i, int j){
         int padre = rand()%k;
         crearArista(grafo, k, padre, generarPeso());
     }
-
 
     //ahora veamos las aristas restantes
     int restantes = e - v +1;
@@ -170,6 +182,14 @@ Grafo *generadorAleatorio(int i, int j){
     return grafo;
 }
 
+
+/**
+ * @brief Libera toda la memoria dinámica asociada a la estructura de un Grafo.
+ * 
+ * Libera de forma eficiente los tres componentes principales del grafo
+ * 
+ * @param grafo Puntero a la estructura `Grafo` que se desea liberar de la memoria RAM.
+ */
 void liberarGrafo(Grafo *grafo) {
     if (grafo == NULL) return;
     free(grafo->pool);

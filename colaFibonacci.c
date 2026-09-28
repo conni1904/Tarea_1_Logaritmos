@@ -3,6 +3,7 @@
 #include <math.h>
 #include <string.h>
 #include "base.h"
+#include <time.h>
 
 
 typedef struct nodoFibonacci{ /*Estructura que define a cada nodo de una cola de Fibonacci*/
@@ -389,6 +390,8 @@ Grafo *primFibonacci(Grafo *g, int r){
 
     //ahora buscamos el nodo con menor peso con extractmin
     //bucle principal
+    int cuantosDecrease = 0;
+    double tiempoAcum = 0.0;
     while(Q->cantNodos > 0){
         nodoFibonacci *nodoMinimo = extractMin(Q);
         if(nodoMinimo == NULL){
@@ -406,11 +409,17 @@ Grafo *primFibonacci(Grafo *g, int r){
             if(!enMST[v] && pesoArista<clave[v]){ //evaluamos q aun no este en mst y q la arista (u,v) es mas barata q la opcion ya conocida hasta el momento para alcanzar v 
                     clave[v]= pesoArista;
                     padre[v]=u;
+                    cuantosDecrease= cuantosDecrease + 1;
+                    clock_t t_ini= clock();
                     decreaseKey(Q, nodosCola[v], pesoArista);
+                    clock_t t_fin= clock();
+                    tiempoAcum += (double)(t_fin-t_ini)/ CLOCKS_PER_SEC;
             }
             actual= actual->siguiente;
         }
     }
+    printf("Cantidad de decrease fibonacci : %d\n",cuantosDecrease);
+    printf("Tiempo acumulado fibonacci: %f\n",tiempoAcum);
     //ahora si constuimos el arbol cobertor minimo
     for (int i =0; i<n; i++){
         if(padre[i] != -1){ //recorremos el arreglo de padres y para cada nodo q tenga una conexion valida lo insertamos la albrol

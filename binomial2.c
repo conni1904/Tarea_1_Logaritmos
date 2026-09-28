@@ -1,5 +1,6 @@
 #include "base.h"
 #include <math.h>
+#include <time.h>
 typedef struct par{
     double costo;
     int nodo;
@@ -133,7 +134,10 @@ void decreaseKeyB(colaBinomial *Q, int v, double c){
     reordenar(Q, arbol);
 }
 
+
 Grafo *PrimBinomial(Grafo *g,int r){
+    int cuantosDecrease = 0;
+    double tiempoAcum = 0.0;
     int n = g->numeroNodos;
 
     int *parent = (int*) malloc(n * sizeof(int)); 
@@ -166,11 +170,19 @@ Grafo *PrimBinomial(Grafo *g,int r){
             if(Q->pos[u]!=NULL && wu<costos[u]){
                 costos[u] = wu; 
                 parent[u] = v;
+                cuantosDecrease= cuantosDecrease + 1;
+                clock_t t_ini= clock();
                 decreaseKeyB(Q,u,wu);
+                clock_t t_fin= clock();
+                tiempoAcum += (double)(t_fin-t_ini)/ CLOCKS_PER_SEC;
             }
             actual = actual->siguiente;
         }
+
     }
+    printf("Cantidad de decrease binomial : %d\n",cuantosDecrease);
+    printf("Tiempo acumulado binomial: %f\n",tiempoAcum);
+
     free(parent);
     free(costos);
     free(Q->lista);
