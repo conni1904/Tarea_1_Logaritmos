@@ -6,7 +6,7 @@
 
 
 typedef struct nodoFibonacci{ /*Estructura que define a cada nodo de una cola de Fibonacci*/
-    float peso; /* Peso de la arista mas barata hacia el arbol cobertor minimo*/ 
+    double peso; /* Peso de la arista mas barata hacia el arbol cobertor minimo*/ 
     int nombre; /* Nombre para identificar al nodo*/
     int cantHijos; /* Cantidad de hijos del nodo*/
     bool perdioHijo; /* Flag para marcar si el nodo ha perdido un hijo*/ 
@@ -55,7 +55,7 @@ colaFibonacci* iniCola() {
  * @return Puntero al nuevo nodo creado.
  * 
  */
-nodoFibonacci* insertar(colaFibonacci *Q, int nombre_nodo, float peso){
+nodoFibonacci* insertar(colaFibonacci *Q, int nombre_nodo, double peso){
     nodoFibonacci *nuevo= (nodoFibonacci*) malloc(sizeof(nodoFibonacci));
     nuevo->nombre = nombre_nodo;
     nuevo->peso = peso;
@@ -332,11 +332,11 @@ void cascadingCut(colaFibonacci *Q, nodoFibonacci *y){
  * los hijos sean mayores que los padres con las funciones de cut y cascading cut.
  * @param Q puntero a la cola de Fibonacci
  * @param x puntero al nodo que se le quiere decrementar la clave
- * @param nuevoPeso valor float de la nueva clave
+ * @param nuevoPeso valor double de la nueva clave
  * 
  * @see cascadinCut, cut
  */
-void decreaseKey(colaFibonacci *Q, nodoFibonacci *x, float nuevoPeso){
+void decreaseKey(colaFibonacci *Q, nodoFibonacci *x, double nuevoPeso){
     if(nuevoPeso > x->peso){
         return;
     }
@@ -370,7 +370,7 @@ Grafo *primFibonacci(Grafo *g, int r){
     Grafo *T = crearGrafo(n, n-1); //creamos un grafo con la misma cant de vertices pero sin conexiones (asi iremos construyendo el mst)
     //punteros auiliares
     int *padre = (int*) malloc(n * sizeof(int)); // arreglo q contendrá para cada nodo i el nodo padre q lo conecte al arbol MST (en decir va anotando las aristas mas baratas )
-    float *clave = (float*) malloc(n * sizeof(float)); //costo minimo para conectar un nodo al MST
+    double *clave = (double*) malloc(n * sizeof(double)); //costo minimo para conectar un nodo al MST
     bool *enMST = (bool*) malloc(n * sizeof(bool)); //para no revisar nodos nuevamente si ya forma parte del MST
     nodoFibonacci **nodosCola= (nodoFibonacci**) malloc(n * sizeof(nodoFibonacci*));  //lista de "direcciones de acceso rápido", para q el decreasekey se haga en O(1)
 
@@ -402,7 +402,7 @@ Grafo *primFibonacci(Grafo *g, int r){
         nodoLista *actual = g->nodos[u].conexiones;
         while(actual != NULL){
             int v = actual->nodo;
-            float pesoArista = actual->costo;
+            double pesoArista = actual->costo;
             if(!enMST[v] && pesoArista<clave[v]){ //evaluamos q aun no este en mst y q la arista (u,v) es mas barata q la opcion ya conocida hasta el momento para alcanzar v 
                     clave[v]= pesoArista;
                     padre[v]=u;

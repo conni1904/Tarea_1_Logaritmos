@@ -1,7 +1,7 @@
 #include "base.h"
 #include <math.h>
 typedef struct par{
-    float costo;
+    double costo;
     int nodo;
 }par;
 
@@ -21,7 +21,7 @@ typedef struct colaBinomial{
     int maxArbol;
 }colaBinomial;
 
-arbolBk *crearArbol(float costo, int nodo){
+arbolBk *crearArbol(double costo, int nodo){
     arbolBk *arbol = malloc(sizeof(arbolBk));
     arbol->info.costo = costo;
     arbol->info.nodo = nodo;
@@ -62,7 +62,7 @@ void insertarArbol(colaBinomial *cola, arbolBk *arbol){
     }
 }
 
-colaBinomial *crearCola(float *costos, int n){
+colaBinomial *crearCola(double *costos, int n){
     //crea una cola en base a la lista de costos(en inicio todos infinitos salvo 1), cada costo es de cada nodo (1,2,3...)
     colaBinomial *Q = malloc(sizeof(colaBinomial));
     Q->n = n;
@@ -127,7 +127,7 @@ void reordenar(colaBinomial *Q, arbolBk *arbol){
     }
 }
 
-void decreaseKeyB(colaBinomial *Q, int v, float c){
+void decreaseKeyB(colaBinomial *Q, int v, double c){
     arbolBk *arbol = Q->pos[v];
     arbol->info.costo=c;
     reordenar(Q, arbol);
@@ -137,7 +137,7 @@ Grafo *PrimBinomial(Grafo *g,int r){
     int n = g->numeroNodos;
 
     int *parent = (int*) malloc(n * sizeof(int)); 
-    float *costos = (float*) malloc(n * sizeof(float));
+    double *costos = (double*) malloc(n * sizeof(double));
 
     costos[r] = 0.0f;
     parent[r] = -1;
@@ -154,7 +154,7 @@ Grafo *PrimBinomial(Grafo *g,int r){
 
     while(Q->n > 0){
         par min = extractMinB(Q);
-        float c = min.costo;
+        double c = min.costo;
         int v = min.nodo;
         if (v != r){
             crearArista(T, parent[v], v, c);
@@ -162,7 +162,7 @@ Grafo *PrimBinomial(Grafo *g,int r){
         nodoLista *actual = g->nodos[v].conexiones;
         while(actual != NULL){
             int u = actual->nodo;
-            float wu = actual->costo;
+            double wu = actual->costo;
             if(Q->pos[u]!=NULL && wu<costos[u]){
                 costos[u] = wu; 
                 parent[u] = v;

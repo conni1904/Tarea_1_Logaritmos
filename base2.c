@@ -6,17 +6,24 @@
 
 
 typedef struct nodoLista{ /*Estructura que representa a un nodo de una lista*/
-    float costo; // Costo del nodo de la lista
+    double costo; // Costo del nodo de la lista
     int nodo; // Número para identificar el nodo
     struct nodoLista *siguiente; //Puntero al siguiente nodo de la lista
-}nodoLista;
+} nodoLista;
 
-typedef struct NodoGrafo{ /*Estructura que representa a un nodo de un grafo*/
-    int nombre; /*Nombre para identificar el nodo del grafo*/
-    nodoLista *conexiones; /*Puntero a una lista con las conexiones a otros nodos que tiene el nodo*/
-    int grado;
-}NodoGrafo;
+/**
+ * @brief Estructura que representa un nodo (vértice) dentro del grafo.
+ */
+typedef struct NodoGrafo{ /**< Estructura que representa a un nodo de un grafo*/
+    int nombre; /**< Nombre para identificar el nodo del grafo*/
+    nodoLista *conexiones; /**< Puntero a una lista con las conexiones a otros nodos que tiene el nodo*/
+    int grado; /**< Número de vecinos conectados al nodo.*/
+} NodoGrafo;
 
+
+/**
+ * @brief Estructura principal que representa el Grafo y su gestión de memoria.
+ */
 typedef struct Grafo{ /*Estructura que representa a un grafo*/
     NodoGrafo *nodos; /*Puntero a nodo que conforma el grafo*/
     int numeroNodos; /* Cantidad total de nodos del grafo*/
@@ -36,7 +43,7 @@ typedef struct Grafo{ /*Estructura que representa a un grafo*/
  * @param costo_nodo costo asociado a la arista
  * @param nombre_nodo identificador del nodo destino
  */
-void insertarLista(Grafo *g, NodoGrafo *nodoGrafo, float costo_nodo, int nombre_nodo){
+void insertarLista(Grafo *g, NodoGrafo *nodoGrafo, double costo_nodo, int nombre_nodo){
     nodoLista *nuevo = &g->pool[g->pool_usado++];
     nuevo->costo = costo_nodo;
     nuevo->nodo = nombre_nodo;
@@ -77,7 +84,7 @@ Grafo *crearGrafo(int numNodos, int maxAristas){
  * @param nodoB Uno de los nodos que se quiere conectar
  * @param peso Peso de la arista que se está creando
  */
-void crearArista(Grafo *grafo, int nodoA, int nodoB, float peso){
+void crearArista(Grafo *grafo, int nodoA, int nodoB, double peso){
     insertarLista(grafo, &(grafo->nodos[nodoA]), peso, nodoB);
     insertarLista(grafo, &(grafo->nodos[nodoB]), peso, nodoA);
 }
@@ -85,17 +92,17 @@ void crearArista(Grafo *grafo, int nodoA, int nodoB, float peso){
 
 /**
  * @brief Genera un peso aleatorio a una arista en el rango (0,1]
- * Esta función calcula un valor float "aleatorio" con distribución uniforme. Se le suma un 1
+ * Esta función calcula un valor double "aleatorio" con distribución uniforme. Se le suma un 1
  * al resultado de rand para garantizar que no existan aristas de valor 0
  * 
- * @return un valor float dentro del rango (0,1]
+ * @return un valor double dentro del rango (0,1]
  */
-float generarPeso(){
-    return (float)(rand() + 1) / (RAND_MAX + 1.0f);
+double generarPeso(){
+    return (double)(rand() + 1) / (RAND_MAX + 1.0);
 }
 
-float pesoMST(Grafo *g){
-    float pesoTot = 0.0f;
+double pesoMST(Grafo *g){
+    double pesoTot = 0.0;
     for(int i =0; i< g->numeroNodos ; i++){
         nodoLista *actual = g->nodos[i].conexiones;
         while(actual != NULL){

@@ -8,7 +8,7 @@
 #include <string.h>
 
 typedef struct nodoLista {
-    float costo;
+    double costo;
     int nodo;
     struct nodoLista *siguiente;
 } nodoLista;
@@ -28,12 +28,12 @@ typedef struct Grafo {
 } Grafo;
 
 // Prototipos de funciones
-void insertarLista(Grafo *g, NodoGrafo *nodoGrafo, float costo_nodo, int nombre_nodo);
+void insertarLista(Grafo *g, NodoGrafo *nodoGrafo, double costo_nodo, int nombre_nodo);
 bool buscarNodo(nodoLista *lista, int nombre_nodo);
 Grafo *crearGrafo(int numNodos, int maxAristas);
-void crearArista(Grafo *grafo, int nodoA, int nodoB, float peso);
-float generarPeso(void);
-float pesoMST(Grafo *g);
+void crearArista(Grafo *grafo, int nodoA, int nodoB, double peso);
+double generarPeso(void);
+double pesoMST(Grafo *g);
 Grafo *generadorAleatorio(int i, int j);
 
 #endif // BASE_H
