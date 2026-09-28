@@ -13,12 +13,12 @@ double tiempoA1B[10];
 
 
 int main (int argvc, char* argv[]){
-    printf("i=18, j=22\n");
+    printf("i=17, j=22\n");
     for(int k=0; k<10; k++){
         //COSTO TOTAL
         //seria a i=20
         //j=20
-        Grafo *grafo = generadorAleatorio(18, 22);
+        Grafo *grafo = generadorAleatorio(17, 22);
 
         // cola fibomacci
         
